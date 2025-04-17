@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stored Forensic Images</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stored_images.css') }}">
+</head>
+<script>
+  // Auto-hide flash messages after 4 seconds
+  setTimeout(function() {
+    const flashes = document.querySelectorAll('.flash');
+    flashes.forEach(flash => {
+      flash.style.transition = 'opacity 0.5s ease-out';
+      flash.style.opacity = '0';
+      setTimeout(() => flash.remove(), 500);  // Remove from DOM after fade
+    });
+  }, 4000); // 4 seconds
+</script>
+
+<body>
+<header>
+   <nav>
+    <a href="{{ url_for('home') }}">Home</a>
+
+
+    {% if current_user.role != 'legal' %}
+        <a href="{{ url_for('upload') }}">Upload</a>
+        <a href="{{ url_for('extract') }}">Extract</a>
+    {% endif %}
+
+    {% if current_user.role == 'admin' %}
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('stored_images') }}">Stored Images</a>
+       <a href="{{ url_for('add_user_by_admin') }}">Add User</a>
+
+    {% elif current_user.role == 'legal' %}
+        <a href="{{ url_for('legal_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('stored_images') }}">Stored Images</a>
+    {% elif current_user.role == 'investigator' %}
+        <a href="{{ url_for('investigator_dashboard') }}">Dashboard</a>
+    {% endif %}
+    <a href="{{ url_for('view_tamper_logs') }}">Tamper Logs</a>
+
+    <a href="{{ url_for('logout') }}">Logout</a>
+</nav>
+</header>
+
+<main>
+
+    <h2>🗃️ Stored Forensic Images</h2>
+
+    <!-- Sort Controls -->
+    <form method="get" class="sort-form">
+        <label>Sort by:</label>
+        <select name="sort_by">
+            <option value="timestamp" {% if sort_by == 'timestamp' %}selected{% endif %}>Timestamp</option>
+            <option value="case_id" {% if sort_by == 'case_id' %}selected{% endif %}>Case ID</option>
+        </select>
+
+        <select name="order">
+            <option value="desc" {% if order == 'desc' %}selected{% endif %}>Descending</option>
+            <option value="asc" {% if order == 'asc' %}selected{% endif %}>Ascending</option>
+        </select>
+
+        <button type="submit">🔃 Apply</button>
+    </form>
+<!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container">
+        {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- Image Cards -->
+    <div class="image-grid">
+        {% for item in results %}
+        <div class="record-card">
+            <img src="{{ url_for('static', filename='uploads/' + item.record.filename) }}" alt="Image" class="preview-image" width="200"
+                 onerror="this.src='{{ url_for('static', filename='images/placeholder.png') }}';">
+
+            <div class="record-info">
+                <p><strong>🆔 Case ID:</strong> {{ item.record.case_id }}</p>
+                <p><strong>🕵️ Investigator:</strong> {{ item.record.investigator_name }}</p>
+                <p><strong>📅 Timestamp:</strong> {{ item.record.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+
+                <p><strong>🔐 Signature:</strong> <br><code>{{ item.record.signature }}</code></p>
+
+                <p><strong>📦 Stored Status (DB):</strong>
+                    {% if item.stored_status == 'Authentic' %}
+                        <span style="color: green;">✔️ Authentic</span>
+                    {% else %}
+                        <span style="color: red;">❌ Tampered</span>
+                    {% endif %}
+                </p>
+
+                <p><strong>🔄 Live Status (Current File):</strong>
+                    {% if item.live_status == 'Authentic' %}
+                        <span style="color: green;">✔️ Authentic</span>
+                    {% elif item.live_status == 'Tampered' %}
+                        <span style="color: red;">❌ Tampered</span>
+                    {% else %}
+                        <span style="color: orange;">⚠️ {{ item.live_status }}</span>
+                    {% endif %}
+                </p>
+
+                <p><strong>📄 Metadata:</strong></p>
+                <pre>{{ item.extracted }}</pre>
+
+                <!-- Verify Again Button -->
+                <form method="POST" action="{{ url_for('verify_again', record_id=item.record.id) }}">
+                    <button class="verify-btn">🔍 Verify Again</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+        {% if pagination.has_prev %}
+            <a href="{{ url_for('stored_images', page=pagination.prev_num, sort_by=sort_by, order=order) }}">⬅️ Prev</a>
+        {% endif %}
+        <span>Page {{ pagination.page }} of {{ pagination.pages }}</span>
+        {% if pagination.has_next %}
+            <a href="{{ url_for('stored_images', page=pagination.next_num, sort_by=sort_by, order=order) }}">Next ➡️</a>
+        {% endif %}
+    </div>
+</main>
+</body>
+</html>

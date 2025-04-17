@@ -1,0 +1,216 @@
+
+
+
+{% block content %}
+<nav>
+    <a href="{{ url_for('home') }}">Home</a>
+
+
+    {% if current_user.role != 'legal' %}
+        <a href="{{ url_for('upload') }}">Upload</a>
+        <a href="{{ url_for('extract') }}">Extract</a>
+    {% endif %}
+
+    {% if current_user.role == 'admin' and current_user.is_admin %}
+    <a href="{{ url_for('dashboard') }}">Dashboard</a>
+    <a href="{{ url_for('stored_images') }}">Stored Images</a>
+    <a href="{{ url_for('add_user_by_admin') }}">cd path/to/your/project
+cd Add User</a>
+
+    {% elif current_user.role == 'legal' %}
+        <a href="{{ url_for('legal_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('stored_images') }}">Stored Images</a>
+    {% elif current_user.role == 'investigator' %}
+        <a href="{{ url_for('investigator_dashboard') }}">Dashboard</a>
+    {% endif %}
+    <a href="{{ url_for('view_tamper_logs') }}">Tamper Logs</a>
+
+    <a href="{{ url_for('logout') }}">Logout</a>
+</nav>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+
+<div class="dashboard-wrapper">
+    <!-- Sidebar + Header can go in layout.html -->
+
+    <div class="dashboard-header">
+        <h1>Welcome, {{ current_user.username }} 👋</h1>
+        <p>Here’s what’s happening today.</p>
+    </div>
+
+    <!-- 🔢 Analytics Cards -->
+    <div class="analytics-cards">
+        <div class="card analytics">
+            <h3>{{ total_records }}</h3>
+            <p>Total Cases</p>
+        </div>
+        <div class="card analytics">
+            <h3>{{ total_users }}</h3>
+            <p>Registered Users</p>
+        </div>
+        <div class="card analytics">
+            <h3>{{ total_uploads }}</h3>
+            <p>Total Uploads</p>
+        </div>
+        <div class="card analytics">
+            <h3>{{ total_investigators }}</h3>
+            <p>Investigators</p>
+        </div>
+        <div class="card analytics">
+            <h3>{{ total_legals }}</h3>
+            <p>Legal Authorities</p>
+        </div>
+    </div>
+
+    <!-- 📁 Verification Summary + Admin Users Side by Side -->
+
+
+        </div>
+
+        <div class="card admin-users">
+            <h2>⚙️ Admin - Manage Users</h2>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Admin</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ "✅" if user.is_admin else "❌" }}</td>
+                        <td>
+                            {% if not user.is_admin %}
+                                <a href="{{ url_for('promote_user', email=user.email) }}">Promote</a>
+                            {% else %}
+                                <a href="{{ url_for('demote_user', email=user.email) }}">Demote</a>
+                            {% endif %}
+                            |
+                            <a href="{{ url_for('delete_user', user_id=user.id) }}"
+                               onclick="return confirm('Are you sure?')">Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+<div class="card full-width">
+    <h2>📈 Authentic vs Tampered Over Time</h2>
+    <canvas id="veriChart" height="100"></canvas>
+</div>
+
+    <!-- 🖼️ Uploaded Images Section -->
+    <div class="card full-width">
+        <h2>Uploaded Forensic Images</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Verification</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for image in uploaded_images %}
+                <tr>
+                    <td><img src="{{ url_for('download_file', filename=image.file_path) }}" alt="Preview" /></td>
+                    <td>
+                        {% if image.verification_status == 'Authentic' %}
+                        <span style="color: green;">✔️ Authentic</span>
+                        {% else %}
+                        <span style="color: red;">❌ Tampered</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('download_file', filename=image.file_path) }}">⬇️</a>
+                        <a href="{{ url_for('view_metadata', record_id=image.id) }}" class="btn btn-secondary">📝</a>
+
+                        <form method="POST" action="{{ url_for('delete_record', record_id=image.id) }}" style="display:inline;">
+                            <button type="submit" class="delete-btn">🗑️</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+</div>
+{% endblock %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+fetch("/admin/analytics/verification_trends")
+  .then(res => res.json())
+  .then(data => {
+    const ctx = document.getElementById('veriChart').getContext('2d');
+
+    // Clean data by removing leading empty values, but preserve first (0,0) as anchor
+    const filteredLabels = ['0'];
+    const filteredAuthentic = [0];
+    const filteredTampered = [0];
+
+    for (let i = 0; i < data.weeks.length; i++) {
+      const hasData = data.authentic[i] > 0 || data.tampered[i] > 0;
+      if (hasData) {
+        filteredLabels.push(data.weeks[i]);
+        filteredAuthentic.push(data.authentic[i]);
+        filteredTampered.push(data.tampered[i]);
+      }
+    }
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: filteredLabels,
+        datasets: [
+          {
+            label: '✔️ Authentic',
+            data: filteredAuthentic,
+            borderColor: '#22c55e',
+            backgroundColor: 'rgba(34, 197, 94, 0.2)',
+            tension: 0.4,
+            fill: true
+          },
+          {
+            label: '❌ Tampered',
+            data: filteredTampered,
+            borderColor: '#ef4444',
+            backgroundColor: 'rgba(239, 68, 68, 0.2)',
+            tension: 0.4,
+            fill: true
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: {
+            beginAtZero: true,
+            ticks: {
+              autoSkip: false
+            }
+          },
+          y: {
+            beginAtZero: true,
+            suggestedMin: 0,
+            suggestedMax: Math.max(...filteredAuthentic, ...filteredTampered) + 1,
+            ticks: {
+              stepSize: 1
+            }
+          }
+        }
+      }
+    });
+});
+</script>
+
+
+

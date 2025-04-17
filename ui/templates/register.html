@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Register - StegoForensics</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
+</head>
+<body>
+
+<nav>
+    <div class="logo">
+        <a href="{{ url_for('root_home') }}">🏠 Home</a>
+    </div>
+    <div class="dropdown">
+        <div class="dropdown-toggle">🔐 Login As</div>
+        <div class="dropdown-content">
+            <a href="{{ url_for('role_login', role='investigator') }}">🕵️ Investigator</a>
+            <a href="{{ url_for('role_login', role='admin') }}">🛠️ Admin</a>
+            <a href="{{ url_for('role_login', role='legal') }}">⚖️ Legal Authority</a>
+        </div>
+    </div>
+</nav>
+
+<!-- ✅ Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-container">
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<div class="register-container">
+    <h2>Create a New Account</h2>
+
+    <form method="POST">
+        <label>Username:</label><br>
+        <input type="text" name="username" required><br><br>
+
+        <label>Email:</label><br>
+        <input type="email" name="email" required><br>
+        <small id="email-feedback"></small><br><br>
+
+        <label for="role">Select Role:</label>
+        <select name="role" required>
+            <option value="">-- Choose Role --</option>
+            <option value="investigator">Forensic Investigator</option>
+            <option value="admin">Administrator</option>
+            <option value="legal">Legal Authority</option>
+        </select><br><br>
+
+        <label>Password:</label><br>
+        <input type="password"
+               name="password"
+               required
+               pattern="(?=.*[A-Z])(?=.*\d).{8,}"
+               title="At least 8 characters, including one uppercase letter and one number"><br>
+
+        <label>Confirm Password:</label><br>
+        <input type="password" name="confirm_password" required><br><br>
+
+        <small>Password must be 8+ characters, include a number, uppercase, and special character.</small><br><br>
+
+        <input type="submit" value="Register">
+    </form>
+
+    <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a>.</p>
+</div>
+
+<!-- ✅ JavaScript (AJAX Email Check) -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const emailInput = document.querySelector('input[name="email"]');
+    const feedback = document.getElementById('email-feedback');
+
+    emailInput.addEventListener('input', function () {
+        const email = this.value;
+
+        if (!email.includes('@')) {
+            feedback.textContent = '';
+            return;
+        }
+
+        fetch('/check_email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'taken') {
+                feedback.textContent = "❌ Email is already registered";
+                feedback.style.color = "red";
+            } else if (data.status === 'unreachable') {
+                feedback.textContent = "❌ Invalid or unreachable email address";
+                feedback.style.color = "red";
+            } else if (data.status === 'invalid_format') {
+                feedback.textContent = "❌ Invalid email format";
+                feedback.style.color = "red";
+            } else if (data.status === 'available') {
+                feedback.textContent = "✅ Email is available";
+                feedback.style.color = "green";
+            } else {
+                feedback.textContent = "";
+            }
+        });
+    });
+});
+</script>
+
+
+</body>
+</html>

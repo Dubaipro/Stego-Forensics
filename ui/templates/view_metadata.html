@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Metadata Details</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/view_metadata.css') }}">
+</head>
+<nav>
+    <a href="{{ url_for('home') }}">Home</a>
+
+
+    {% if current_user.role != 'legal' %}
+        <a href="{{ url_for('upload') }}">Upload</a>
+        <a href="{{ url_for('extract') }}">Extract</a>
+    {% endif %}
+
+    {% if current_user.role == 'admin' %}
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('stored_images') }}">Stored Images</a>
+        <a href="{{ url_for('add_user_by_admin') }}">Add User</a>
+
+    {% elif current_user.role == 'legal' %}
+        <a href="{{ url_for('legal_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('stored_images') }}">Stored Images</a>
+    {% elif current_user.role == 'investigator' %}
+        <a href="{{ url_for('investigator_dashboard') }}">Dashboard</a>
+    {% endif %}
+    <a href="{{ url_for('view_tamper_logs') }}">Tamper Logs</a>
+
+    <a href="{{ url_for('logout') }}">Logout</a>
+</nav>
+<body>
+    <div class="container">
+        <h1>🧾 Metadata Details for <code>{{ record.filename }}</code></h1>
+
+        <p><strong>🆔 Case ID:</strong> {{ record.case_id }}</p>
+        <p><strong>🕵️ Investigator:</strong> {{ record.investigator_name }}</p>
+        <p><strong>🕒 Timestamp:</strong> {{ record.timestamp }}</p>
+        <p><strong>🔗 Chain of Custody:</strong> {{ record.chain_of_custody }}</p>
+        <p><strong>📝 Notes:</strong> {{ notes }}</p>
+        <p><strong>✅ Status:</strong>
+            {% if record.verification %}
+                <span style="color: green;">✔️ Authentic</span>
+            {% else %}
+                <span style="color: red;">❌ Tampered</span>
+            {% endif %}
+        </p>
+
+        <a href="{{ url_for('home') }}" class="btn">⬅️ Back to Home </a>
+    </div>
+</body>
+</html>

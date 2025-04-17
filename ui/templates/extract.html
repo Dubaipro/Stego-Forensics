@@ -1,0 +1,81 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Extract Metadata</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/extract.css') }}">
+
+</head>
+<!-- 🔗 Navigation Bar -->
+<nav>
+    <a href="{{ url_for('home') }}">Home</a>
+
+
+    {% if current_user.role != 'legal' %}
+        <a href="{{ url_for('upload') }}">Upload</a>
+        <a href="{{ url_for('extract') }}">Extract</a>
+    {% endif %}
+
+    {% if current_user.role == 'admin' %}
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('stored_images') }}">Stored Images</a>
+        <a href="{{ url_for('add_user_by_admin') }}">Add User</a>
+
+    {% elif current_user.role == 'legal' %}
+        <a href="{{ url_for('legal_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('stored_images') }}">Stored Images</a>
+    {% elif current_user.role == 'investigator' %}
+        <a href="{{ url_for('investigator_dashboard') }}">Dashboard</a>
+    {% endif %}
+    <a href="{{ url_for('view_tamper_logs') }}">Tamper Logs</a>
+
+    <a href="{{ url_for('logout') }}">Logout</a>
+</nav>
+
+<main>
+    <h2>🔍 Extract Metadata from Embedded Image</h2>
+
+    <!-- ✅ Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" enctype="multipart/form-data">
+        <label for="case_id">🔑 Enter Case ID:</label><br>
+        <input type="text" name="case_id" id="case_id" required><br><br>
+
+        <label for="image">🖼️ Select Embedded Image:</label><br>
+        <input type="file" name="image" id="image" required><br><br>
+
+        <input type="submit" value="Extract">
+    </form>
+
+    {% if extracted_metadata %}
+    <pre>{{ extracted_metadata }}</pre>
+
+
+    <p><strong>🧾 Digital Signature:</strong></p>
+    <div class="signature-block">{{ signature or "Not Found" }}</div>
+
+        <p><strong>🔐 Verification:</strong>
+            {% if verification %}
+                ✅ <strong>Valid</strong>
+            {% else %}
+                ❌ <strong>Invalid</strong>
+            {% endif %}
+        </p>
+    {% endif %}
+</main>
+
+</body>
+</html>
+
+

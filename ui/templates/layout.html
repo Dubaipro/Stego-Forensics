@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}StegoForensics{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.png') }}">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            {% if current_user.role != 'legal' %}
+            <a href="{{ url_for('upload') }}">Upload</a>
+            <a href="{{ url_for('extract') }}">Extract</a>
+            {% endif %}
+            <a href="{{ url_for('dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </nav>
+
+    </header>
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container">
+                    {% for category, message in messages %}
+                        <div class="flash flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        &copy; 2025 StegoForensics | All Rights Reserved
+    </footer>
+</body>
+</html>

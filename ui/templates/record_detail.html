@@ -1,0 +1,73 @@
+
+
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/record_detail.css') }}">
+{% endblock %}
+
+{% block content %}
+<nav>
+    <a href="{{ url_for('home') }}">Home</a>
+
+
+    {% if current_user.role != 'legal' %}
+        <a href="{{ url_for('upload') }}">Upload</a>
+        <a href="{{ url_for('extract') }}">Extract</a>
+    {% endif %}
+
+    {% if current_user.role == 'admin' %}
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('stored_images') }}">Stored Images</a>
+        <a href="{{ url_for('add_user_by_admin') }}">Add User</a>
+
+    {% elif current_user.role == 'legal' %}
+        <a href="{{ url_for('legal_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('stored_images') }}">Stored Images</a>
+    {% elif current_user.role == 'investigator' %}
+        <a href="{{ url_for('investigator_dashboard') }}">Dashboard</a>
+    {% endif %}
+    <a href="{{ url_for('view_tamper_logs') }}">Tamper Logs</a>
+
+    <a href="{{ url_for('logout') }}">Logout</a>
+</nav>
+<h2>🧾 Forensic Record Details</h2>
+<div class="record-detail">
+    <table class="record-table">
+        <tr>
+            <th>Timestamp</th>
+            <td>{{ record.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+        </tr>
+        <tr>
+            <th>Uploaded by</th>
+            <td>{{ record.user.username }} ({{ record.user.email }})</td>
+        </tr>
+        <tr>
+            <th>ID</th>
+            <td>{{ record.id }}</td>
+        </tr>
+        <tr>
+            <th>Filename</th>
+            <td>{{ record.filename }}</td>
+        </tr>
+        <tr>
+            <th>Metadata</th>
+            <td>{{ record.metadata_content }}</td>
+        </tr>
+        <tr>
+            <th>Signature</th>
+            <td><code>{{ record.signature }}</code></td>
+        </tr>
+        <tr>
+            <th>Verified</th>
+            <td>
+                {% if record.verification %}
+                    ✅ Valid
+                {% else %}
+                    ❌ Invalid
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+    <a href="{{ url_for('dashboard') }}">← Back to Dashboard</a>
+</div>
+{% endblock %}

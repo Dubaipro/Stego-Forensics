@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - {{ role.capitalize() }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/role_login.css') }}">
+</head>
+<nav>
+    <div class="logo">
+        <a href="{{ url_for('root_home') }}">🏠 Home</a>
+    </div>
+    <div class="dropdown">
+        <div class="dropdown-toggle">🔐 Login As</div>
+        <div class="dropdown-content">
+            <a href="{{ url_for('role_login', role='investigator') }}">🕵️ Investigator</a>
+            <a href="{{ url_for('role_login', role='admin') }}">🛠️ Admin</a>
+            <a href="{{ url_for('role_login', role='legal') }}">⚖️ Legal Authority</a>
+
+        </div>
+    </div>
+</nav>
+<body>
+    <div class="login-container">
+        <h2>🔐 {{ role.capitalize() }} Login</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flashes">
+                <ul>
+                    {% for category, message in messages %}
+                        <li class="flash {{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        {% endwith %}
+
+        <form method="POST" class="login-form">
+            <label for="identifier">Username or Email:</label>
+            <input type="text" name="identifier" id="identifier" required><br><br>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required><br><br>
+
+            <button type="submit">Login as {{ role.capitalize() }}</button>
+        </form>
+
+        <p><a href="{{ url_for('register') }}">📝 Don't have an account?</a></p>
+    </div>
+</body>
+</html>

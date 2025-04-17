@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+{% block content %}
+    <nav>
+    <a href="{{ url_for('home') }}">Home</a>
+
+
+    {% if current_user.role != 'legal' %}
+        <a href="{{ url_for('upload') }}">Upload</a>
+        <a href="{{ url_for('extract') }}">Extract</a>
+    {% endif %}
+
+    {% if current_user.role == 'admin' %}
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('stored_images') }}">Stored Images</a>
+        <a href="{{ url_for('add_user_by_admin') }}">Add User</a>
+
+    {% elif current_user.role == 'legal' %}
+        <a href="{{ url_for('legal_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('stored_images') }}">Stored Images</a>
+    {% elif current_user.role == 'investigator' %}
+        <a href="{{ url_for('investigator_dashboard') }}">Dashboard</a>
+    {% endif %}
+    <a href="{{ url_for('view_tamper_logs') }}">Tamper Logs</a>
+
+    <a href="{{ url_for('logout') }}">Logout</a>
+</nav>
+<div class="container">
+    <h2>➕ Add New User</h2>
+    <form method="POST">
+        <label>Username:</label>
+        <input type="text" name="username" required><br>
+
+        <label>Email:</label>
+        <input type="email" name="email" required><br>
+
+        <label>Role:</label>
+        <select name="role" required>
+            <option value="investigator">Investigator</option>
+            <option value="legal">Legal Authority</option>
+            <option value="admin">Admin</option>
+        </select><br>
+
+        <label>Password:</label>
+        <input type="password" name="password" required><br>
+
+        <label>Confirm Password:</label>
+        <input type="password" name="confirm_password" required><br>
+
+        <button type="submit">✅ Add User</button>
+    </form>
+</div>
+{% endblock %}
+</title>
+</head>
+<body>
+
+</body>
+</html>
+
+<style>body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f3f4f6;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+nav {
+    background-color: #2c3e50;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    padding: 10px 16px;
+    background-color: #34495e;
+    border-radius: 6px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+nav a:hover {
+    background-color: #1abc9c;
+    transform: scale(1.05);
+}
+
+/* Main container */
+.container {
+    max-width: 600px;
+    margin: 40px auto;
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+}
+
+.container h2 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 30px;
+}
+
+/* Form Styling */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+label {
+    font-weight: 500;
+    color: #555;
+}
+
+input, select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+input:focus, select:focus {
+    border-color: #3498db;
+    outline: none;
+}
+
+/* Button */
+button {
+    background-color: #3498db;
+    color: white;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+    background-color: #2980b9;
+    transform: translateY(-1px);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .container {
+        margin: 20px;
+        padding: 20px;
+    }
+
+    nav {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+</style>

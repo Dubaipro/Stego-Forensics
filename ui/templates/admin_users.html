@@ -1,0 +1,65 @@
+
+{% block title %}Manage Users - StegoForensics{% endblock %}
+
+{% block content %}
+<nav>
+    <a href="{{ url_for('home') }}">Home</a>
+
+
+    {% if current_user.role != 'legal' %}
+        <a href="{{ url_for('upload') }}">Upload</a>
+        <a href="{{ url_for('extract') }}">Extract</a>
+    {% endif %}
+
+    {% if current_user.role == 'admin' %}
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('stored_images') }}">Stored Images</a>
+    {% elif current_user.role == 'legal' %}
+        <a href="{{ url_for('legal_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('stored_images') }}">Stored Images</a>
+    {% elif current_user.role == 'investigator' %}
+        <a href="{{ url_for('investigator_dashboard') }}">Dashboard</a>
+    {% endif %}
+    <a href="{{ url_for('view_tamper_logs') }}">Tamper Logs</a>
+
+    <a href="{{ url_for('logout') }}">Logout</a>
+</nav>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_user.css') }}">
+
+<h2>👥 Manage Users</h2>
+
+<p>Total Registered Users: <strong>{{ total_users }}</strong></p>
+
+<table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Admin</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <form method="get" class="user-search-form" style="display: flex; gap: 10px; margin-bottom: 15px;">
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ "✅" if user.is_admin else "❌" }}</td>
+            <td>
+                <a href="{{ url_for('edit_user', user_id=user.id) }}">✏️ Edit</a> |
+                {% if not user.is_admin %}
+                    <a href="{{ url_for('promote_user', email=user.email) }}">Promote</a>
+                {% else %}
+                    <a href="{{ url_for('demote_user', email=user.email) }}">Demote</a>
+                {% endif %}
+                |
+                <a href="{{ url_for('delete_user', user_id=user.id) }}" onclick="return confirm('Are you sure?')">🗑️</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

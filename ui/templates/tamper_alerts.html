@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+<h2>⚠️ Tamper Detection Logs</h2>
+
+<table border="1" cellpadding="10" cellspacing="0">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Case ID</th>
+            <th>Filename</th>
+            <th>Detected At</th>
+            <th>Details</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for log in logs %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ log.record.case_id }}</td>
+            <td>{{ log.record.filename }}</td>
+            <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+            <td><pre>{{ log.discrepancy_details }}</pre></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

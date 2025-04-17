@@ -1,0 +1,219 @@
+from flask import Flask, render_template, request, redirect, url_for, flash
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_migrate import Migrate
+from datetime import datetime
+import os
+from flask import send_from_directory
+import re
+from datetime import datetime
+
+
+
+# Custom modules
+from embedding.embed import embed_data
+from embedding.extract import extract_data
+from crypto.signature import sign_message, verify_signature
+from Crypto.PublicKey import RSA
+
+# Paths and Keys
+basedir = os.path.abspath(os.path.dirname(__file__))
+key_dir = os.path.join(basedir, 'keys')
+os.makedirs(key_dir, exist_ok=True)
+private_key_path = os.path.join(key_dir, "private.pem")
+public_key_path = os.path.join(key_dir, "public.pem")
+
+if not os.path.exists(private_key_path) or not os.path.exists(public_key_path):
+    key = RSA.generate(2048)
+    with open(private_key_path, "wb") as f:
+        f.write(key.export_key())
+    with open(public_key_path, "wb") as f:
+        f.write(key.publickey().export_key())
+
+# App Setup
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'your_secret_key_here'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:202120020@localhost:5432/forensics'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# DB Init
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+
+# Login Init
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+# Models
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(150), unique=True)
+    email = db.Column(db.String(150), unique=True, nullable=False)  # ✅ NEW
+    password = db.Column(db.String(150))
+
+
+class ForensicRecord(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(200), nullable=False)
+    metadata_content = db.Column(db.Text, nullable=False)
+    signature = db.Column(db.Text, nullable=False)
+    verification = db.Column(db.Boolean, nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+# User Loader
+@login_manager.user_loader
+def load_user(user_id):
+    return db.session.get(User, int(user_id))
+
+# Routes
+@app.route('/')
+@login_required
+def home():
+    return render_template('home.html', username=current_user.username)
+
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    records = ForensicRecord.query.order_by(ForensicRecord.timestamp.desc()).all()
+    return render_template('dashboard.html', records=records)
+
+
+@app.route('/upload', methods=['GET', 'POST'])
+@login_required
+def upload():
+    if request.method == 'POST':
+        image = request.files['image']
+        metadata_content = request.form['metadata']
+
+        filename = image.filename
+        input_path = os.path.join('uploads', filename)
+        output_path = os.path.join('uploads', f"embedded_{filename}")
+        os.makedirs('uploads', exist_ok=True)
+        image.save(input_path)
+
+        embed_data(input_path, output_path, metadata_content)
+        extracted_metadata = extract_data(output_path)
+
+        signature_bytes = sign_message(private_key_path, extracted_metadata)
+        if not signature_bytes:
+            return "Error signing metadata"
+        signature = signature_bytes.hex()
+
+        is_verified = verify_signature(public_key_path, extracted_metadata, bytes.fromhex(signature))
+
+        # Optional user-defined timestamp
+        user_timestamp = request.form.get('timestamp', '').strip()
+        if user_timestamp:
+            try:
+                timestamp = datetime.strptime(user_timestamp, '%Y-%m-%d %H:%M:%S')
+            except ValueError:
+                flash("❌ Invalid timestamp format. Using current time instead.")
+                timestamp = datetime.utcnow()
+        else:
+            timestamp = datetime.utcnow()
+
+        record = ForensicRecord(
+            filename=f"embedded_{filename}",
+            metadata_content=metadata_content,
+            signature=signature,
+            verification=is_verified,
+            timestamp=timestamp
+        )
+        db.session.add(record)
+        db.session.commit()
+
+        return render_template("upload.html",
+                               embedded_image=f"embedded_{filename}",
+                               extracted_metadata=extracted_metadata,
+                               signature=signature,
+                               verification=is_verified)
+    return render_template("upload.html")
+
+@app.route('/extract', methods=['GET', 'POST'])
+@login_required
+def extract():
+    if request.method == 'POST':
+        image = request.files['image']
+        filename = image.filename
+        input_path = os.path.join('uploads', filename)
+        os.makedirs('uploads', exist_ok=True)
+        image.save(input_path)
+
+        extracted_metadata = extract_data(input_path)
+        record = ForensicRecord.query.filter_by(filename=filename).first()
+        verification_result = False
+        signature = None
+
+        if record:
+            signature = record.signature
+            verification_result = verify_signature(public_key_path, extracted_metadata, bytes.fromhex(signature))
+
+        return render_template("extract.html",
+                               extracted_metadata=extracted_metadata,
+                               verification=verification_result,
+                               signature=signature,
+                               filename=filename)
+    return render_template("extract.html")
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form.get('username').strip()
+        email = request.form.get('email').strip()
+        password = request.form.get('password').strip()
+
+        if not username or not email or not password:
+            return "⚠️ All fields are required."
+
+        if len(password) < 8 or not any(c.isdigit() for c in password) or not any(c.isupper() for c in password):
+            return "❌ Password must be at least 8 characters, with a number and uppercase letter."
+
+        if not re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email):
+            return "❌ Invalid email format."
+
+        if User.query.filter((User.username == username) | (User.email == email)).first():
+            return "⚠️ Username or Email already exists."
+
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+        new_user = User(username=username, email=email, password=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
+
+        flash("✅ Registration successful. Please log in.")
+        return redirect(url_for('login'))
+
+    return render_template('register.html')
+
+
+@app.route('/download/<path:filename>')
+@login_required
+def download_file(filename):
+    upload_folder = os.path.join(basedir, 'uploads')
+    return send_from_directory(upload_folder, filename, as_attachment=True)
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        user = User.query.filter_by(username=username).first()
+
+        if user and check_password_hash(user.password, password):
+            login_user(user)
+            return redirect(url_for('home'))
+        return "Invalid credentials."
+
+    return render_template('login.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
+
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True)

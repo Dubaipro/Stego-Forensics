@@ -1,0 +1,141 @@
+
+
+{% block content %}
+<head>
+    <title>Upload Image</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/upload.css') }}">
+</head>
+<nav>
+    <a href="{{ url_for('home') }}">Home</a>
+
+
+    {% if current_user.role != 'legal' %}
+        <a href="{{ url_for('upload') }}">Upload</a>
+        <a href="{{ url_for('extract') }}">Extract</a>
+    {% endif %}
+
+    {% if current_user.role == 'admin' %}
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('stored_images') }}">Stored Images</a>
+        <a href="{{ url_for('add_user_by_admin') }}">Add User</a>
+
+    {% elif current_user.role == 'legal' %}
+        <a href="{{ url_for('legal_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('stored_images') }}">Stored Images</a>
+    {% elif current_user.role == 'investigator' %}
+        <a href="{{ url_for('investigator_dashboard') }}">Dashboard</a>
+    {% endif %}
+    <a href="{{ url_for('view_tamper_logs') }}">Tamper Logs</a>
+
+    <a href="{{ url_for('logout') }}">Logout</a>
+</nav>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-container">
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<div class="container">
+    <h1>Upload Image</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" id="step" name="step" value="{{ 'confirm' if preview_metadata else 'preview' }}">
+        <input type="hidden" name="image_filename" value="{{ image_filename or '' }}">
+
+        <label>Upload Image:</label><br>
+        <input type="file" name="images" accept=".png,.jpg,.jpeg,.tif,.tiff" multiple {% if not preview_metadata %}required{% endif %}><br><br>
+
+        <label>Case ID:</label><br>
+        <input type="text" name="case_id" value="{{ case_id or '' }}" required pattern="\d{4}" title="Case ID must be exactly 4 digits" maxlength="4" minlength="4"><br><br>
+
+        <label>Investigator Name:</label><br>
+        <input type="text" name="investigator_name" value="{{ investigator_name or '' }}" required><br><br>
+
+        <label>Timestamp:</label><br>
+        <input type="datetime-local" name="timestamp" id="timestamp" required><br><br>
+
+        <label>Chain of Custody Details:</label><br>
+        <textarea name="chain_of_custody" rows="4" cols="50" required>{{ chain_of_custody or '' }}</textarea><br><br>
+        <label>📝 Notes:</label><br>
+        <textarea name="notes" rows="4" cols="50" required>{{ notes or '' }}</textarea><br><br>
+        {% if preview_metadata %}
+            <button type="submit" onclick="document.getElementById('step').value='preview';">🔄 Update Preview</button>
+        {% else %}
+            <button type="submit">➡️ Preview Metadata</button>
+        {% endif %}
+    </form>
+
+    <!-- Preview Block -->
+    {% if preview_metadata %}
+    <div class="preview-only">
+        <h2>📄 Metadata Preview</h2>
+        <table class="preview-table">
+            <tr><th>Image Filename</th><td>{{ image_filename }}</td></tr>
+            <tr><th>🖼️ Image Preview</th>
+                <td>
+                    {% for name in image_filename.split(',') %}
+                        <img src="{{ url_for('static', filename='uploads/' + name|trim) }}" width="150" style="margin:5px; border-radius:8px;">
+                    {% endfor %}
+                </td>
+            </tr>
+            <tr><th>🆔 Case ID</th><td>{{ case_id }}</td></tr>
+            <tr><th>🕵️ Investigator</th><td>{{ investigator_name }}</td></tr>
+            <tr><th>🕒 Timestamp</th><td>{{ timestamp }}</td></tr>
+            <tr><th>🔗 Chain of Custody</th><td>{{ chain_of_custody }}</td></tr>
+            <tr><th>📝 Notes</th><td>{{ notes }}</td></tr>
+
+
+        </table>
+        <form method="POST">
+            <input type="hidden" name="step" value="confirm">
+            <input type="hidden" name="image_filename" value="{{ image_filename }}">
+            <input type="hidden" name="case_id" value="{{ case_id }}">
+            <input type="hidden" name="investigator_name" value="{{ investigator_name }}">
+            <input type="hidden" name="timestamp" value="{{ timestamp }}">
+            <input type="hidden" name="chain_of_custody" value="{{ chain_of_custody }}">
+            <input type="hidden" name="notes" value="{{ notes }}">
+            <br>
+            <button type="submit">✅ Confirm & Embed</button>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Embed Results -->
+    {% if embedded_image %}
+        <div class="result-box">
+            <h3>✅ Results:</h3>
+            <p><strong>🖼️ Image:</strong> {{ embedded_image }}</p>
+            <p><strong>📝 Extracted Metadata:</strong> {{ extracted_metadata }}</p>
+            <p><strong>🔐 Digital Signature:</strong></p>
+            <div class="signature-block">{{ signature }}</div>
+
+            <p><strong>✅ Verification:</strong>
+                {% if verification %}
+                    <span style="color: green;">✔️ Authentic</span>
+                {% else %}
+                    <span style="color: red;">❌ Invalid Signature</span>
+                {% endif %}
+            </p>
+            <p>
+                <a href="{{ url_for('download_file', filename=embedded_image) }}" class="btn-download">
+                    ⬇️ Download Embedded Image
+                </a>
+            </p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+<script>
+    window.onload = function () {
+        const now = new Date();
+        const offset = now.getTimezoneOffset();
+        const localTime = new Date(now.getTime() - (offset * 60000));
+        const formatted = localTime.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:MM"
+        document.getElementById('timestamp').value = formatted;
+    };
+</script>
+

@@ -1,0 +1,174 @@
+<head>
+    <meta charset="UTF-8">
+    <title>Case Report - {{ record.case_id }}</title>
+    <style>
+ /* General PDF Styling */
+body {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    background: #fff;
+}
+
+h1, h2 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-size: 24px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-top: 20px;
+}
+
+h2 {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+/* Header Styling */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    border-bottom: 2px solid #2c3e50;
+    margin-bottom: 20px;
+}
+logo-container {
+    display: flex;
+    justify-content: center; /* Centers the logo horizontally */
+    align-items: center; /* Centers the logo vertically */
+    height: 100%; /* Ensures the container takes the full available height */
+}
+
+.logo-container img {
+    width: 80px;
+    height: auto;
+}
+
+.title-container {
+    text-align: right;
+}
+
+.title-container h2 {
+    margin: 0;
+    font-size: 22px;
+    color: #2c3e50;
+}
+
+.title-container p {
+    margin: 0;
+    font-size: 14px;
+    color: #7f8c8d;
+}
+
+/* Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+table th, table td {
+    padding: 12px 15px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+table th {
+    background-color: #2c3e50;
+    color: #fff;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+table td {
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+table tr:nth-child(even) td {
+    background-color: #f2f2f2;
+}
+
+/* Chain of Custody and Notes Styling */
+table td pre {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 12px;
+    color: #555;
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    padding: 10px;
+    white-space: pre-wrap; /* Ensures long text wraps in PDF */
+    word-wrap: break-word;
+}
+
+/* Status Styling */
+table td span {
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+table td span.authentic {
+    color: #2ecc71;
+    background-color: #ecf9f0;
+    border: 1px solid #2ecc71;
+}
+
+table td span.tampered {
+    color: #e74c3c;
+    background-color: #fbeaea;
+    border: 1px solid #e74c3c;
+}
+
+/* Footer Styling */
+.footer {
+    text-align: center;
+    font-size: 12px;
+    color: #7f8c8d;
+    margin-top: 20px;
+    border-top: 1px solid #ddd;
+    padding-top: 10px;
+}
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    <div class="logo-container">
+        <img src="static/image/logo.png" alt="StegoForensics Logo">
+    </div>
+    <div class="title-container">
+        <h2>StegoForensics: A Secure Steganographic System</h2>
+    </div>
+</div>
+    <h1>Forensic Case Report</h1>
+
+    <table>
+        <tr><th>Case ID</th><td>{{ record.case_id }}</td></tr>
+        <tr><th>Investigator</th><td>{{ record.investigator_name }}</td></tr>
+        <tr><th>Email</th><td>{{ record.user.email }}</td></tr>
+        <tr><th>Timestamp</th><td>{{ record.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td></tr>
+        <tr><th>Status</th>
+            <td>{{ '✔️ Authentic' if record.verification else '❌ Tampered' }}</td>
+        </tr>
+        <tr><th>Chain of Custody</th><td>{{ record.chain_of_custody }}</td></tr>
+        <tr><th>Notes</th><td><pre>{{ record.notes }}</pre></td></tr>
+    </table>
+
+    <div class="signature-line">
+        <p>Signature:_____________________</p>
+        <div class="line"></div>
+    </div>
+
+</body>
+</html>

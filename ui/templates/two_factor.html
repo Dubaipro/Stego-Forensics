@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Two-Factor Verification</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/verify.css') }}">
+</head>
+<body>
+    <div class="login-container">
+        <h2>Two-Factor Authentication</h2>
+        <p>Enter the 6-digit code sent to <strong>{{ email }}</strong>.</p>
+        <form method="POST">
+            <input type="text" name="code" placeholder="Enter code" required>
+            <button type="submit">Verify</button>
+        </form>
+    </div>
+</body>
+</html>

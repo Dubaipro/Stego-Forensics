@@ -1,0 +1,47 @@
+
+
+{% block content %}
+<nav>
+    <a href="{{ url_for('home') }}">Home</a>
+
+
+    {% if current_user.role != 'legal' %}
+        <a href="{{ url_for('upload') }}">Upload</a>
+        <a href="{{ url_for('extract') }}">Extract</a>
+    {% endif %}
+
+    {% if current_user.role == 'admin' %}
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('stored_images') }}">Stored Images</a>
+        <a href="{{ url_for('add_user_by_admin') }}">Add User</a>
+
+    {% elif current_user.role == 'legal' %}
+        <a href="{{ url_for('legal_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('stored_images') }}">Stored Images</a>
+    {% elif current_user.role == 'investigator' %}
+        <a href="{{ url_for('investigator_dashboard') }}">Dashboard</a>
+    {% endif %}
+    <a href="{{ url_for('view_tamper_logs') }}">Tamper Logs</a>
+
+    <a href="{{ url_for('logout') }}">Logout</a>
+</nav>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_user.css') }}">
+
+<h2>✏️ Edit User</h2>
+
+<form method="POST" action="{{ url_for('update_user', user_id=user.id) }}">
+    <label for="username">Username:</label><br>
+    <input type="text" id="username" name="username" value="{{ user.username }}" required><br><br>
+
+    <label for="email">Email:</label><br>
+    <input type="email" id="email" name="email" value="{{ user.email }}" required><br><br>
+
+    <label for="role">Role:</label><br>
+    <input type="text" id="role" name="role" value="{{ user.role }}" required><br><br>
+
+    <label for="is_admin">Admin:</label>
+    <input type="checkbox" id="is_admin" name="is_admin" {% if user.is_admin %}checked{% endif %}><br><br>
+
+    <button type="submit">Update User</button>
+</form>
+{% endblock %}

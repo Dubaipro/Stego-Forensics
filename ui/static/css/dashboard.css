@@ -1,0 +1,301 @@
+/* ===== General Styles ===== */
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f5f7;
+    color: #333;
+}
+
+/* ===== Navigation Bar ===== */
+nav {
+    background-color: #1f2937;
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+nav a {
+    color: #fff;
+    text-decoration: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-weight: 500;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+nav a:hover {
+    background-color: #374151;
+    transform: scale(1.05);
+}
+
+nav a.active {
+    background-color: #2563eb;
+    color: #fff;
+}
+
+/* ===== Dashboard Wrapper ===== */
+.dashboard-wrapper {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 15px;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* ===== Dashboard Header ===== */
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.dashboard-header h1 {
+    color: #1f2937;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.dashboard-header p {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* ===== Analytics Cards ===== */
+.analytics-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.card.analytics {
+    background-color: #ffffff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card.analytics:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+.card.analytics h3 {
+    font-size: 20px;
+    color: #2563eb;
+    margin: 5px 0;
+}
+
+.card.analytics p {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* ===== Donut Charts ===== */
+.donut-charts {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    margin: 40px auto;
+    flex-wrap: wrap;
+}
+
+.donut {
+    width: 140px;
+    height: 140px;
+    position: relative;
+}
+
+.donut svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.donut .bg {
+    fill: none;
+    stroke: #eee;
+    stroke-width: 3;
+}
+
+.donut .meter {
+    fill: none;
+    stroke: #007BFF;
+    stroke-width: 3;
+    stroke-linecap: round;
+    transition: stroke-dasharray 0.5s ease;
+}
+
+.donut .percentage {
+    fill: #007BFF;
+    font-size: 9px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    transform: rotate(90deg);
+    transform-origin: center;
+}
+
+.donut .label {
+    fill: #333;
+    font-size: 5px;
+    text-anchor: middle;
+    transform: rotate(90deg);
+    transform-origin: center;
+}
+
+/* ===== Two-column Section ===== */
+.two-column-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+/* ===== Card Style General ===== */
+.card {
+    background-color: #ffffff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* ===== Admin User Table ===== */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+    font-size: 12px;
+}
+
+.admin-table th {
+    background-color: #f9fafb;
+    color: #4b5563;
+    font-weight: bold;
+}
+
+.admin-table tr:nth-child(even) {
+    background-color: #f3f4f6;
+}
+
+.admin-table tr:hover {
+    background-color: #e5e7eb;
+}
+
+/* ===== Uploaded Images Section ===== */
+.card.full-width {
+    margin-top: 20px;
+}
+
+.card.full-width table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.card.full-width table th,
+.card.full-width table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+    font-size: 12px;
+}
+
+.card.full-width table th {
+    background-color: #f9fafb;
+    color: #4b5563;
+    font-weight: bold;
+}
+
+.card.full-width table tr:nth-child(even) {
+    background-color: #f3f4f6;
+}
+
+.card.full-width table tr:hover {
+    background-color: #e5e7eb;
+}
+
+.card.full-width table img {
+    width: 40px;
+    height: auto;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* ===== Action Buttons ===== */
+a {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: #1d4ed8;
+    text-decoration: underline;
+}
+
+button.delete-btn {
+    background: none;
+    border: none;
+    color: #dc2626;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0;
+    transition: color 0.3s;
+}
+
+button.delete-btn:hover {
+    color: #b91c1c;
+}
+
+/* ===== Animation Keyframes ===== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 768px) {
+    .analytics-cards {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .two-column-section {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-header h1 {
+        font-size: 24px;
+    }
+
+    .dashboard-header p {
+        font-size: 12px;
+    }
+}

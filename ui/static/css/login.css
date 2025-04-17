@@ -1,0 +1,167 @@
+/* ===== Reset & Base ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f4f4f9;
+    color: #333;
+}
+
+/* ===== Navigation Bar ===== */
+nav {
+    background-color: #2b2d42;
+    color: #edf2f4;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+nav .logo a {
+    text-decoration: none;
+    color: #edf2f4;
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+
+nav .dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+nav .dropdown-toggle {
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    background-color: #8d99ae;
+    color: #edf2f4;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+nav .dropdown-toggle:hover {
+    background-color: #ef233c;
+}
+
+nav .dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: #edf2f4;
+    min-width: 200px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    border-radius: 4px;
+}
+
+nav .dropdown-content a {
+    color: #2b2d42;
+    padding: 0.75rem 1rem;
+    text-decoration: none;
+    display: block;
+    transition: background-color 0.3s ease;
+}
+
+nav .dropdown-content a:hover {
+    background-color: #8d99ae;
+    color: #fff;
+}
+
+nav .dropdown:hover .dropdown-content,
+nav .dropdown:focus-within .dropdown-content {
+    display: block;
+}
+
+/* ===== Login Form Container ===== */
+.login-container {
+    max-width: 400px;
+    margin: 60px auto;
+    padding: 30px 40px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.login-container h2 {
+    text-align: center;
+    color: #007BFF;
+    margin-bottom: 20px;
+}
+
+.login-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.login-form input,
+.login-form select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 18px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.login-form input[type="submit"] {
+    background-color: #2b2d42;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background-color 0.3s ease;
+}
+
+.login-form input[type="submit"]:hover {
+    background-color: #007BFF;
+}
+
+/* ===== Flash Messages ===== */
+.flashes {
+    background-color: #f8d7da;
+    border-left: 5px solid #dc3545;
+    color: #721c24;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+}
+
+.flashes ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.flashes li {
+    font-size: 14px;
+}
+
+/* ===== Register Link ===== */
+.login-container p {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+.login-container a {
+    color: #007BFF;
+    text-decoration: none;
+}
+
+.login-container a:hover {
+    text-decoration: underline;
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 600px) {
+    .login-container {
+        margin: 30px 20px;
+        padding: 20px;
+    }
+}

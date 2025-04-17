@@ -1,0 +1,211 @@
+
+
+
+{% block content %}
+<nav>
+    <a href="{{ url_for('home') }}">Home</a>
+
+
+    {% if current_user.role != 'legal' %}
+        <a href="{{ url_for('upload') }}">Upload</a>
+        <a href="{{ url_for('extract') }}">Extract</a>
+    {% endif %}
+
+    {% if current_user.role == 'admin' %}
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('stored_images') }}">Stored Images</a>
+    {% elif current_user.role == 'legal' %}
+        <a href="{{ url_for('legal_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('stored_images') }}">Stored Images</a>
+    {% elif current_user.role == 'investigator' %}
+        <a href="{{ url_for('investigator_dashboard') }}">Dashboard</a>
+    {% endif %}
+    <a href="{{ url_for('view_tamper_logs') }}">Tamper Logs</a>
+
+    <a href="{{ url_for('logout') }}">Logout</a>
+</nav>
+<div class="investigator-container">
+    <h2>🕵️ Investigator Dashboard</h2>
+
+    <!-- Search -->
+    <form method="get" class="search-bar">
+        <input type="text" name="query" placeholder="Search by Case ID or Date..." value="{{ request.args.get('query', '') }}">
+        <button type="submit">Search</button>
+    </form>
+
+    {% if records %}
+        {% for record in records %}
+        <div class="record-card">
+            <h4>📁 Case ID: {{ record.case_id }}</h4>
+            <p>👮 Investigator: {{ record.investigator_name }}</p>
+            <p>🕒 {{ record.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+            <p>✅ Verified:
+                {% if record.verification %}
+                    <span style="color: green;">✔️ Authentic</span>
+                {% else %}
+                    <span style="color: red;">❌ Tampered</span>
+                {% endif %}
+            </p>
+            <a href="{{ url_for('download_file_invistigator', filename=record.filename) }}" class="btn">⬇️ Download Image</a>
+            <a href="{{ url_for('edit_metadata', record_id=record.id) }}" class="btn btn-secondary">✏️ Edit Metadata</a>
+
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No forensic cases found.</p>
+    {% endif %}
+</div>
+
+<style>
+/* General body styling */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9fb;
+    color: #333;
+}
+
+/* Navigation bar styling */
+nav {
+    background-color: #333;
+    padding: 10px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+nav a {
+    color: #fff;
+    text-decoration: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+nav a:hover {
+    background-color: #555;
+}
+
+nav a.active {
+    background-color: #007BFF;
+    color: #fff;
+}
+
+/* Investigator container */
+.investigator-container {
+    max-width: 1000px;
+    margin: 50px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Title styling */
+.investigator-container h2 {
+    text-align: center;
+    color: #007BFF;
+    margin-bottom: 20px;
+}
+
+/* Search bar styling */
+.search-bar {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.search-bar input {
+    width: 300px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.search-bar button {
+    padding: 10px 15px;
+    margin-left: 10px;
+    background-color: #007BFF;
+    color: white;
+    font-size: 14px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.search-bar button:hover {
+    background-color: #0056b3;
+}
+
+/* Record card styling */
+.record-card {
+    background: #fff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.record-card h4 {
+    color: #007BFF;
+    margin-bottom: 10px;
+}
+
+.record-card p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #333;
+}
+
+.record-card p strong {
+    color: #555;
+}
+
+/* Button styling */
+.btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 15px;
+    background-color: #28a745;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.btn:hover {
+    background-color: #218838;
+}
+
+.btn-secondary {
+    background-color: #ffc107;
+    color: #333;
+}
+
+.btn-secondary:hover {
+    background-color: #e0a800;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .investigator-container {
+        padding: 15px;
+    }
+
+    .search-bar input {
+        width: 80%;
+    }
+
+    .search-bar button {
+        width: auto;
+    }
+}
+</style>
+{% endblock %}
+
+

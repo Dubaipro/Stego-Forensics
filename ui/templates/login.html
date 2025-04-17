@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - StegoForensics</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+</head>
+<nav>
+    <div class="logo">
+        <a href="{{ url_for('root_home') }}">🏠 Home</a>
+    </div>
+    <div class="dropdown">
+        <div class="dropdown-toggle">🔐 Login As</div>
+        <div class="dropdown-content">
+            <a href="{{ url_for('role_login', role='investigator') }}">🕵️ Investigator</a>
+            <a href="{{ url_for('role_login', role='admin') }}">🛠️ Admin</a>
+            <a href="{{ url_for('role_login', role='legal') }}">⚖️ Legal Authority</a>
+
+        </div>
+    </div>
+</nav>
+<body>
+    <div class="login-container">
+        <h2>Login to Your Account</h2>
+
+        <!-- Flash message block -->
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flashes">
+                <ul>
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Login Form -->
+        <form method="POST" class="login-form">
+            <label for="identifier">Username or Email:</label>
+            <input type="text" name="identifier" id="identifier" required><br><br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required><br><br>
+
+            <label for="role">Select Role:</label>
+            <select name="role" id="role" required>
+                <option value="">-- Choose Role --</option>
+                <option value="admin">Admin</option>
+                <option value="investigator">Investigator</option>
+                <option value="legal">Legal</option>
+
+    </select><br><br>
+
+    <input type="submit" value="Login">
+</form>
+
+
+        <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a>.</p>
+    </div>
+</body>
+</html>
