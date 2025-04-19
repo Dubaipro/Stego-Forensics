@@ -93,9 +93,6 @@ document.addEventListener("DOMContentLoaded", function () {
             if (data.status === 'taken') {
                 feedback.textContent = "❌ Email is already registered";
                 feedback.style.color = "red";
-            } else if (data.status === 'unreachable') {
-                feedback.textContent = "❌ Invalid or unreachable email address";
-                feedback.style.color = "red";
             } else if (data.status === 'invalid_format') {
                 feedback.textContent = "❌ Invalid email format";
                 feedback.style.color = "red";
