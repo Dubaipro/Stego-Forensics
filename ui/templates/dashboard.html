@@ -14,8 +14,7 @@
     {% if current_user.role == 'admin' and current_user.is_admin %}
     <a href="{{ url_for('dashboard') }}">Dashboard</a>
     <a href="{{ url_for('stored_images') }}">Stored Images</a>
-    <a href="{{ url_for('add_user_by_admin') }}">cd path/to/your/project
-cd Add User</a>
+    <a href="{{ url_for('add_user_by_admin') }}"> Add User</a>
 
     {% elif current_user.role == 'legal' %}
         <a href="{{ url_for('legal_dashboard') }}">Dashboard</a>

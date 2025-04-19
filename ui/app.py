@@ -1432,32 +1432,39 @@ def register():
         approve_url = url_for('approve_user', token=approve_token, _external=True)
         reject_url = url_for('reject_user', token=reject_token, _external=True)
 
+        # ✅ Smart fallback recipient logic
+        admin_emails = [admin.email for admin in User.query.filter_by(is_admin=True).all()]
+        if not admin_emails:
+            admin_emails = ['stegoforensics@gmail.com']
+
         msg = Message("👤 New User Approval Needed",
                       sender=app.config['MAIL_USERNAME'],
-                      recipients=[admin.email for admin in User.query.filter_by(is_admin=True).all()])
+                      recipients=admin_emails)
 
         msg.html = f"""
-        <div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 25px; border-radius: 10px; color: #333;">
-          <h2 style="margin-top: 0; color: #333;">👤 New User Registration Request</h2>
-          <p style="font-size: 15px;">A new user has registered and is waiting for your approval:</p>
+        <div style="font-family: Arial, sans-serif; background-color: #fefefe; padding: 30px; border-radius: 10px; color: #333;">
+          <h2 style="margin-top: 0; color: #2c3e50;">👤 New User Registration Request</h2>
+          <p style="font-size: 16px;">A new user has registered and is waiting for your approval:</p>
 
-          <ul style="font-size: 15px; line-height: 1.6; padding-left: 20px;">
+          <ul style="font-size: 15px; line-height: 1.8; padding-left: 20px;">
             <li><strong>Username:</strong> {username}</li>
-            <li><strong>Email:</strong> <a href="mailto:{email}" style="color: #0066cc;">{email}</a></li>
+            <li><strong>Email:</strong> <a href="mailto:{email}" style="color: #007bff;">{email}</a></li>
             <li><strong>Role:</strong> {role.capitalize()}</li>
           </ul>
 
-          <div style="margin-top: 30px;">
-            <a href="{approve_url}" 
-               style="background-color: #28a745; color: white; text-decoration: none; 
-                      padding: 12px 22px; border-radius: 6px; font-size: 15px; font-weight: bold; display: inline-block;">
-              ✅ Approve
+          <div style="margin-top: 25px;">
+            <a href="{approve_url}"
+               style="border: 3px solid #28a745; border-radius: 50px; color: #28a745; background-color: white;
+                      padding: 14px 28px; font-size: 16px; font-weight: bold; text-decoration: none; display: inline-block;">
+              ✅ APPROVED
             </a>
+
             &nbsp;&nbsp;
-            <a href="{reject_url}" 
-               style="background-color: #dc3545; color: white; text-decoration: none; 
-                      padding: 12px 22px; border-radius: 6px; font-size: 15px; font-weight: bold; display: inline-block;">
-              ❌ Reject
+
+            <a href="{reject_url}"
+               style="border: 3px solid #dc3545; border-radius: 50px; color: #dc3545; background-color: white;
+                      padding: 14px 28px; font-size: 16px; font-weight: bold; text-decoration: none; display: inline-block;">
+              ❌ REJECTED
             </a>
           </div>
         </div>
