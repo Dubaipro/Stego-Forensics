@@ -1163,9 +1163,10 @@ Notes: {notes}"""
                 return redirect(url_for('upload'))
 
             for filename in image_filenames.split(','):
-                input_path = os.path.join('static', 'uploads', filename)
+                upload_dir = os.path.join(basedir, 'static', 'uploads')
+                input_path = os.path.join(upload_dir, filename)
                 output_name = f"embedded_{filename}"
-                output_path = os.path.join('static', 'uploads', output_name)
+                output_path = os.path.join(upload_dir, output_name)
 
                 embed_data(input_path, output_path, metadata_string)
                 extracted = extract_data(output_path)

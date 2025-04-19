@@ -77,7 +77,7 @@
             <tr><th>🖼️ Image Preview</th>
                 <td>
                     {% for name in image_filename.split(',') %}
-                        <img src="{{ url_for('static', filename='uploads/' + name|trim) }}" width="150" style="margin:5px; border-radius:8px;">
+                    <img src="{{ url_for('static', filename='uploads/' ~ image_filename.split(',')[0]) }}" width="200" height="200">
                     {% endfor %}
                 </td>
             </tr>
