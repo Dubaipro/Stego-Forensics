@@ -1,7 +1,9 @@
 import sys
 from functools import wraps
+from sqlalchemy import create_engine
 
 import cv2
+from Crypto.Signature import pkcs1_15
 from flask import Flask, render_template, request, redirect, url_for, flash, session, abort, send_from_directory, \
     jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -192,6 +194,30 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your_secret_key_here')
 # Database configuration via environment variable (e.g., DATABASE_URL)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres:202120020@localhost:5432/forensics')
+# Database connection details
+DATABASE_USER = "stego_forensics_db_user"
+DATABASE_PASSWORD = "54gE6lMFpT5YR9SWIKdVLAOq3Gh9o0EE"
+DATABASE_HOST = "dpg-d01tjjbuibrs73b5ujj0-a.oregon-postgres.render.com"
+DATABASE_PORT = 5432
+DATABASE_NAME = "stego_forensics_db"
+
+# Create the connection string with SSL mode set to "require"
+DATABASE_URL = (
+    f"postgresql+psycopg2://{DATABASE_USER}:{DATABASE_PASSWORD}"
+    f"@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}?sslmode=require"
+)
+
+# Create the SQLAlchemy engine
+engine = create_engine(DATABASE_URL)
+
+try:
+    # Test the connection
+    with engine.connect() as connection:
+        result = connection.execute("SELECT 1")
+        print(f"Connection successful, result: {result.scalar()}")
+except Exception as e:
+    print(f"Failed to connect to database: {e}")
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SESSION_PERMANENT'] = False
 app.permanent_session_lifetime = timedelta(minutes=120)
