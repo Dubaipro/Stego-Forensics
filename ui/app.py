@@ -114,6 +114,54 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def safe_delete(path):
+    if os.path.exists(path):
+        os.remove(path)
+def preview_uploaded_images(uploaded_images, extract_data_func, temp_path=None):
+    saved_names = []
+    os.makedirs('static/uploads', exist_ok=True)  # ensure folder exists
+
+    for img_file in uploaded_images:
+        if img_file and '.' in img_file.filename:
+            import numpy as np
+            import cv2
+            import uuid
+
+            file_bytes = np.frombuffer(img_file.read(), np.uint8)
+            img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+
+            if img is None:
+                return {"error": "❌ Could not read image file."}
+
+            # Ensure upload folder exists using app config
+            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+            # Generate a secure and unique filename
+            original_filename = secure_filename(img_file.filename)
+            unique_filename = f"{uuid.uuid4().hex}_{original_filename}"
+
+            # Create full path using configured upload folder
+            full_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+
+            # Save image using OpenCV
+            cv2.imwrite(full_path, img)
+            saved_names.append(unique_filename)
+
+            try:
+                if "Case ID:" in extract_data_func(temp_path):
+                    safe_delete(temp_path)
+                    return {"error": "🚫 One of the images already contains embedded metadata."}
+            except Exception:
+                pass
+
+            safe_delete(temp_path)
+
+            unique_name = f"{uuid.uuid4().hex}.png"
+            cv2.imwrite(f'static/uploads/{unique_name}', img)
+            saved_names.append(unique_name)
+
+    return {"filenames": saved_names}
+
 def verify_image(image):
     image_path = os.path.join('static', 'upload', image.filename)
     with open(image_path, 'rb') as file:
@@ -1070,7 +1118,8 @@ Notes: {notes}"""
                             return redirect(url_for('upload'))
                     except:
                         pass
-                    os.remove(temp_path)
+                    if os.path.exists(temp_path):
+                        os.remove(temp_path)
 
                     unique_name = f"{uuid.uuid4().hex}.png"
                     cv2.imwrite(f'static/uploads/{unique_name}', img)
